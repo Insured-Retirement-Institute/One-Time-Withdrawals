@@ -67,7 +67,7 @@ Key Features:
 
 ## Schema Overview
 The schema for full withdrawal transactions is defined in the data model and includes the following key components:
-#Root Attributes
+Root Attributes
 
 - correlationId: Unique transaction ID (string, required)
 - effectiveDate: Transaction date (string, required, format: yyyy-mm-dd)
