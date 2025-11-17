@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+  title: Full Surrender API
+  version: 1.0.0
+  description: API for processing full surrender transactions.
+servers:
+- url: https://api.your-company-domain.com
+  description: Production server
+- url: https://sandbox.your-company-domain.com
+  description: Sandbox environment
+paths:
+  /policy/v1/transactions/{cusip}/{policyNumber}/fullsurrender:
+    post:
+      summary: Process a full surrender transaction
+      operationId: fullSurrender
+      parameters:
+      - name: cusip
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: policyNumber
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                correlationId:
+                  type: string
+                effectiveDate:
+                  type: string
+                override:
+                  type: boolean
+                Object:
+                  type: object
+                  properties:
+                    taxWithholdingInstructions:
+                      type: object
+                    payeeOrBeneficiary:
+                      type: object
+                    parties:
+                      type: object
+                    charges:
+                      type: object
+                    producer:
+                      type: object
+                    transactionAmounts:
+                      type: object
+                taxWithholdingInstructions:
+                  type: object
+                  properties:
+                    party:
+                      type: object
+                    taxWithholdingType:
+                      type: string
+                    taxRateToUse:
+                      type: string
+                    filingStatus:
+                      type: string
+                    dollar:
+                      type: number
+                    percentage:
+                      type: number
+                    exemptions:
+                      type: object
+                    taxJurisdiction:
+                      type: string
+                taxWithholdingInstructions.party:
+                  type: object
+                  properties:
+                    partyId:
+                      type: string
+                    firstName:
+                      type: string
+                    middleName:
+                      type: string
+                    lastName:
+                      type: string
+                    organizationName:
+                      type: string
+                payeeOrBeneficiary:
+                  type: object
+                  properties:
+                    party:
+                      type: object
+                    paymentForm:
+                      type: string
+                    allocationPercent:
+                      type: number
+                    bank:
+                      type: object
+                payeeOrBeneficiary.party:
+                  type: object
+                  properties:
+                    partyId:
+                      type: string
+                    firstName:
+                      type: string
+                    middleName:
+                      type: string
+                    lastName:
+                      type: string
+                    organizationName:
+                      type: string
+                payeeOrBeneficiary.bank:
+                  type: object
+                  properties:
+                    bankId:
+                      type: string
+                    nameOnAccount:
+                      type: string
+                    accountStatus:
+                      type: string
+                    accountType:
+                      type: string
+                    accountNumber:
+                      type: string
+                    routingNumber:
+                      type: string
+                    branchName:
+                      type: string
+                payeeOrBeneficiary.address:
+                  type: object
+                  properties:
+                    addressId:
+                      type: string
+                    addressType:
+                      type: string
+                    addressLine1:
+                      type: string
+                    addressLine2:
+                      type: string
+                    addressLine3:
+                      type: string
+                    city:
+                      type: string
+                    state:
+                      type: string
+                    zipCode:
+                      type: string
+                    zipCodeExtension:
+                      type: string
+                    country:
+                      type: string
+                parties:
+                  type: object
+                  properties:
+                    partyRole:
+                      type: string
+                    partyId:
+                      type: string
+                    firstName:
+                      type: string
+                    middleName:
+                      type: string
+                    lastName:
+                      type: string
+                    organizationName:
+                      type: string
+                    paymentForm:
+                      type: string
+                    allocationPercentage:
+                      type: number
+                    forBenefitOfOrForFurtherCredit:
+                      type: string
+                    bank:
+                      type: object
+                    address:
+                      type: object
+                parties.bank:
+                  type: object
+                  properties:
+                    bankId:
+                      type: string
+                    nameOnAccount:
+                      type: string
+                    accountStatus:
+                      type: string
+                    accountType:
+                      type: string
+                    accountNumber:
+                      type: string
+                    routingNumber:
+                      type: string
+                    branchName:
+                      type: string
+                parties.address:
+                  type: object
+                  properties:
+                    addressId:
+                      type: string
+                    addressType:
+                      type: string
+                    addressLine1:
+                      type: string
+                    addressLine2:
+                      type: string
+                    addressLine3:
+                      type: string
+                    city:
+                      type: string
+                    state:
+                      type: string
+                    zipCode:
+                      type: string
+                    zipCodeExtension:
+                      type: string
+                    country:
+                      type: string
+                charges:
+                  type: object
+                  properties:
+                    chargeType:
+                      type: string
+                    chargeWaiverIndicator:
+                      type: string
+                    chargeWaiverReason:
+                      type: string
+                producer:
+                  type: object
+                  properties:
+                    producerNumber:
+                      type: string
+                    npn:
+                      type: string
+                    crdNumber:
+                      type: string
+                associatedFirmId:
+                  type: string
+                NSCCparticipantID:
+                  type: string
+                transactionAmounts:
+                  type: object
+                  properties:
+                    amountType:
+                      type: string
+                    disbursementType:
+                      type: string
+                    disbursementPaymentForm:
+                      type: string
+              required:
+              - correlationId
+              - effectiveDate
+              - partyId
+              - taxWithholdingType
+              - taxRateToUse
+              - partyId
+              - paymentForm
+              - allocationPercentage
+              - producerNumber
+              - npn
+              - crdNumber
+              - associatedFirmId
+              - NSCCparticipantID
+      responses:
+        '200':
+          description: Successful transaction
+          content:
+            application/json:
+              schema:
+                type: object
