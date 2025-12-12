@@ -1,0 +1,124 @@
+{
+  "method": "POST",
+  "url": "https://api.your-company-domain.com/v1/policies/ABC12345/transactions/full-surrender",
+  "headers": {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Authorization": "Bearer <token>",
+    "CorrelationId": "7b4e9c0a-1234-4567-89ab-001122334455"
+  },
+  "query": {
+    "cusip": "123456789"
+  },
+  "body": {
+    "effectiveDate": "2023-03-06",
+    "override": false,
+    "transactionAmounts": {
+      "amountType": "AMOUNT",
+      "disbursementType": "GROSS",
+      "disbursementPaymentForm": "DTCC"
+    },
+    "taxWithholdingInstructions":[
+     {
+      "party": {
+        "partyId": "Party_PI_1",
+        "firstName": "John",
+        "middleName": "A",
+        "lastName": "Doe",
+        "organizationName": "OrgName"
+      },
+      "taxWithholdingType": "FEDERAL",
+      "taxRateToUse": "USEVALUESENTERED",
+      "filingStatus": "SINGLE",
+      "dollar": 10.0,
+      "percentage": 50.0,
+      "exemptions": 0,
+      "taxJurisdiction": "USA"
+     }
+    ],
+    "payeeOrBeneficiary":[
+     {
+      "party": {
+        "partyId": "Party_PI_1",
+        "firstName": "Jone",
+        "middleName": "A",
+        "lastName": "Doe",
+        "organizationName": "OrgName"
+      },
+      "paymentForm": "DTCC",
+      "allocationPercentage": 100.0,
+      "bank": {
+        "bankId": "Bank_1",
+        "nameOnAccount": "Jone Doe",
+        "accountStatus": "ACTIVEBANKACCOUNT",
+        "accountType": "CHECKING",
+        "accountNumber": "123456789",
+        "routingNumber": "987654321",
+        "branchName": "Main Branch"
+      },
+      "address": {
+        "addressId": "1",
+        "addressType": "RESIDENCE",
+        "addressLine1": "123 Main St",
+        "addressLine2": "Apt 4B",
+        "addressLine3": "",
+        "city": "Metropolis",
+        "state": "NY",
+        "zipCode": "10001",
+        "zipCodeExtension": "1234",
+        "country": "US"
+      }
+     }
+    ],
+    "parties":[
+     {
+      "partyRole": "OWNER",
+      "partyId": "Party_PI_1",
+      "firstName": "John",
+      "middleName": "A",
+      "lastName": "Doe",
+      "organizationName": "OrgName",
+      "paymentForm": "DTCC",
+      "allocationPercentage": 100.0,
+      "bank": {
+        "bankId": "Bank_1",
+        "nameOnAccount": "John Doe",
+        "accountStatus": "ACTIVEBANKACCOUNT",
+        "accountType": "CHECKING",
+        "accountNumber": "123456789",
+        "routingNumber": "987654321",
+        "branchName": "Main Branch"
+      },
+      "address": {
+        "addressId": "1",
+        "addressType": "RESIDENCE",
+        "addressLine1": "123 Main St",
+        "addressLine2": "Apt 4B",
+        "addressLine3": "",
+        "city": "Metropolis",
+        "state": "NY",
+        "zipCode": "10001",
+        "zipCodeExtension": "1234",
+        "country": "US"
+      }
+     }
+    ],
+
+    "charges": [
+     {
+      "chargeType": "COSTOFINSURANCE",
+      "chargeWaiverIndicator": "No",
+      "chargeWaiverReason": "100"
+     }
+    ],
+    "overrideBoolean": false,
+    "producer": {
+      "producerNumber": "PN123456",
+      "npn": "NPN789012",
+      "crdNumber": "CRD345678"
+    },
+    "associatedFirmId": "Firm001",
+    "nsccParticipantId": "NSCC123456"
+    "cusip": "123456789"
+  }
+}

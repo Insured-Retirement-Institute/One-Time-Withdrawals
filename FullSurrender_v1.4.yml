@@ -1,0 +1,456 @@
+openapi: 3.1.0
+info:
+  title: Full Surrender API
+  version: 2.0.0
+  description: API for processing a full surrender transaction.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://api.your-company-domain.com
+    description: Production
+  - url: https://sandbox.your-company-domain.com
+    description: Sandbox
+paths:
+  /v1/policies/{policyNumber}/transactions/{transactionType}:
+    post:
+      summary: Create a full-surrender transaction
+      operationId: fullSurrenderTransaction
+      tags: [Full Surrender]
+      parameters:
+        - $ref: '#/components/parameters/PolicyNumber'
+        - $ref: '#/components/parameters/TransactionType'
+        - $ref: '#/components/parameters/Cusip'
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FullSurrenderRequest'
+            examples:
+              basic:
+                summary: Basic full surrender
+                value:
+                  effectiveDate: '2025-01-15'
+                  transactionAmounts:
+                    amountType: MAX
+                    disbursementType: GROSS
+                    disbursementPaymentForm: DTCC
+                  payeeOrBeneficiary:
+                    - paymentForm: DTCC
+                      allocationPercentage: 100.00
+                      party:
+                        partyId: PAY001
+                        firstName: Jane
+                        lastName: Doe
+                  taxWithholdingInstructions:
+                    taxWithholdingType: FEDERAL
+                    taxRateToUse: USEDEFAULTTABLE
+      responses:
+        '200':
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullSurrenderResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - oauth2: [surrender.write]
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.your-company-domain.com/oauth2/token
+          scopes:
+            surrender.write: Create full surrender transactions
+            surrender.read: Read full surrender transactions
+  parameters:
+    PolicyNumber:
+      name: policyNumber
+      in: path
+      required: true
+      description: Unique policy number (6–20 alphanumeric).
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9]{6,20}$'
+    TransactionType:
+      name: transactionType
+      in: path
+      required: true
+      description: Type of transaction being processed (currently only full-surrender).
+      schema:
+        type: string
+        enum: [full-surrender]
+        pattern: '^[a-z-]+$'
+    Cusip:
+      name: cusip
+      in: query
+      required: false
+      description: Optional; REQUIRED only when policyNumber is not globally unique.
+      x-conditionalRequirement: 'required when duplicate policyNumber exists'
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9]{5,9}$'
+    CorrelationIdHeader:
+      name: CorrelationId
+      in: header
+      required: true
+      description: Unique identifier to trace the request.
+      schema:
+        type: string
+        maxLength: 100
+  schemas:
+    MoneyAmount:
+      type: number
+      description: Monetary amount up to 12 digits plus 2 decimals.
+      minimum: 0
+      maximum: 999999999999.99
+    PercentageValue:
+      type: number
+      description: Percentage value 0-100.
+      minimum: 0
+      maximum: 100
+    FullSurrenderRequest:
+      type: object
+      description: Request to perform a full surrender.
+      properties:
+        effectiveDate:
+          type: string
+          format: date
+          description: Date of transaction submission.
+        cusip:
+          type: string
+          maxLength: 9
+          pattern: '^[A-Za-z0-9]{5,9}$'
+          description: unique identification code.
+        associatedFirmId:
+          type: string
+          maxLength: 100
+          description: DTCC 4 byte identifier
+        nsccParticipantId:
+          type: string
+          maxLength: 100
+          description: Unique identifier for the participant
+        producer:
+          $ref: '#/components/schemas/Producer'
+        transactionAmounts:
+          $ref: '#/components/schemas/TransactionAmounts'
+        payeeOrBeneficiary:
+          type: array
+          description: list of payees or beneficiaries for allocation.
+          items:
+            $ref: '#/components/schemas/PayeeOrBeneficiary'
+        parties:
+          $ref: '#/components/schemas/Parties'
+        taxWithholdingInstructions:
+          type: array
+          description: list of tax withholding instruction entries
+          items:
+            $ref: '#/components/schemas/TaxWithholdingInstruction'
+        charges:
+          $ref: '#/components/schemas/Charges'
+      required:
+        - effectiveDate
+    FullSurrenderResponse:
+      type: object
+      description: Minimal response returning only a message for the submitted transaction. Echoes CorrelationId from header.
+      properties:
+        message:
+          type: string
+          description: Human-readable outcome message.
+        correlationId:
+          type: string
+          description: Echo of request CorrelationId header.
+      required:
+        - message
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        correlationId:
+          type: string
+      required:
+        - code
+        - message
+    Producer:
+      type: object
+      description: Information about the producer submitting the request
+      properties:
+        producerNumber:
+          type: string
+          maxLength: 100
+          description: Carrier assigned unique identifier
+        npn:
+          type: string
+          pattern: '^\d{1,10}$'
+          maxLength: 100
+          description: National Producer Number
+        crdNumber:
+          type: string
+          pattern: '^\d{1,10}$'
+          maxLength: 100
+          description: Central Registration Depository number
+    TransactionAmounts:
+      type: object
+      description: Full surrender transaction amounts.
+      properties:
+        amountType:
+          type: string
+          enum: [MAX]
+          description: Amount Type for full surrender (MAX only).
+        disbursementType:
+          type: string
+          enum: [GROSS, NET, NETNET]
+          description: Type of amount for withdrawal such as Gross or Net
+        disbursementPaymentForm:
+          type: string
+          enum: [DTCC, EFT, ACH, CHECK, WIRE]
+          description: Type of disbursement method such as DTCC, EFT, etc.
+    PayeeOrBeneficiary:
+      type: object
+      description: single payee or beneficiary entry
+      properties:
+        paymentForm:
+          type: string
+          maxLength: 20
+          description: Type of payment form
+        allocationPercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Allocation percentage
+        party:
+          allOf:
+            - $ref: '#/components/schemas/PartyIdentity'
+          description: all relevant parties associated with the policy
+        bank:
+          allOf:
+            - $ref: '#/components/schemas/Bank'
+          description: financial instituation
+        address:
+          allOf:
+            - $ref: '#/components/schemas/Address'
+          description: physical or mailing address details such as street,city etx
+    Address:
+      type: object
+      description: physical or mailing address details such as street,city etx
+      properties:
+        addressId:
+          type: string
+          maxLength: 100
+          description: Address identifier
+        addressType:
+          type: string
+          enum: [RESIDENCE, BUSINESS, POBOXSEASONAL, OTHER]
+          maxLength: 30
+          description: Type of address
+        addressLine1:
+          type: string
+          maxLength: 100
+          description: First line of the address
+        addressLine2:
+          type: string
+          maxLength: 100
+          description: Second line of the address
+        addressLine3:
+          type: string
+          maxLength: 100
+          description: Third line of the address
+        city:
+          type: string
+          maxLength: 100
+          description: City name
+        state:
+          type: string
+          maxLength: 2
+          pattern: '^[A-Z]{2}$'
+          description: State code (2-digit ISO)
+        zipCode:
+          type: string
+          maxLength: 10
+          pattern: '^[0-9A-Za-z -]{3,10}$'
+          description: Zip code
+        zipCodeExtension:
+          type: string
+          maxLength: 4
+          pattern: '^[0-9A-Za-z]{1,4}$'
+          description: Zip code extension
+        country:
+          type: string
+          maxLength: 2
+          pattern: '^[A-Z]{2}$'
+          description: Country code (2-digit ISO)
+    Bank:
+      type: object
+      description: financial instituation
+      properties:
+        bankId:
+          type: string
+          maxLength: 100
+          description: Bank identifier
+        nameOnAccount:
+          type: string
+          maxLength: 100
+          description: Name on the bank account
+        accountStatus:
+          type: string
+          enum: [ACTIVEBANKACCOUNT, TERMINATEDBANKACCOUNT]
+          description: Status of the bank account
+        accountType:
+          type: string
+          enum: [CHECKING, SAVINGS, CREDITCARDACCOUNT, DEBITCARDACCOUNT, BROKERAGEACCOUNT, CERTIFICATEOFDEPOSITACCOUNT]
+          description: Type of the bank account
+        accountNumber:
+          type: string
+          maxLength: 17
+          description: Bank account number
+          pattern: '^\d{4,17}$'
+        routingNumber:
+          type: string
+          maxLength: 9
+          pattern: '^\d{9}$'
+          description: Routing number
+        branchName:
+          type: string
+          maxLength: 100
+          description: Branch name
+    PartyIdentity:
+      type: object
+      description: Common party identity fields.
+      properties:
+        partyId:
+          type: string
+          maxLength: 100
+          description: Payee identifier
+        firstName:
+          type: string
+          maxLength: 100
+          description: First name
+        middleName:
+          type: string
+          maxLength: 100
+          description: Middle name
+        lastName:
+          type: string
+          maxLength: 100
+          description: Last name
+        organizationName:
+          type: string
+          maxLength: 100
+          description: Organization name
+    Parties:
+      type: array
+      description: party to the policy (that is not a producer) and may be an individual or another legal entity.
+      items:
+        $ref: '#/components/schemas/Party'
+    Party:
+      allOf:
+        - $ref: '#/components/schemas/PartyIdentity'
+        - type: object
+          description: Detailed party information for policy-level distribution.
+          properties:
+            partyRole:
+              type: string
+              maxLength: 30
+              description: Role of the party in the transaction
+            paymentForm:
+              type: string
+              maxLength: 20
+              description: Mode of payment
+            allocationPercentage:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: Allocation percentage at policy level
+            bank:
+              allOf:
+                - $ref: '#/components/schemas/Bank'
+            address:
+              allOf:
+                - $ref: '#/components/schemas/Address'
+          required:
+            - partyId
+            - paymentForm
+            - allocationPercentage
+    Charges:
+      type: array
+      description: List of charges (fees and deductions) applied to the transaction
+      items:
+        type: object
+        properties:
+          chargeType:
+            type: string
+            maxLength: 30
+            description: Type of charge
+          chargeWaiverIndicator:
+            type: string
+            maxLength: 3
+            description: Indicates if charge is waived
+          chargeWaiverReason:
+            type: string
+            maxLength: 100
+            description: Reason for charge waiver
+    TaxWithholdingInstruction:
+      type: object
+      description: information about tax withholding details
+      properties:
+        party:
+          allOf:
+            - $ref: '#/components/schemas/PartyIdentity'
+            - type: object
+              required:
+                - partyId
+          description: all relevant parties associated with the policy
+        taxWithholdingType:
+          type: string
+          enum: [FEDERAL, STATE, NRA, BACKUP]
+          description: Type of tax withholding
+        taxRateToUse:
+          type: string
+          enum: [NOWITHHOLDINGELECTED, USEVALUESENTERED, NOWITHHOLDINGALLOWED, USEDEFAULTTABLE]
+          description: Selected tax rate source
+        filingStatus:
+          type: string
+          enum: [SINGLE, DOMESTICPARTNERSHIP, DEFAULT, MARRIED, HEADOFHOUSEHOLD, WIDOWED, DIVORCED]
+          description: Tax filing status
+        dollar:
+          $ref: '#/components/schemas/MoneyAmount'
+        percentage:
+          $ref: '#/components/schemas/PercentageValue'
+        exemptions:
+          type: integer
+          minimum: 0
+          maximum: 99
+          description: Requested exemptions value
+        taxJurisdiction:
+          type: string
+          maxLength: 50
+          description: Jurisdiction for tax purposes
+      required:
+        - taxWithholdingType
+        - taxRateToUse
+security:
+  - oauth2: [surrender.write]
