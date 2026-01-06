@@ -1,0 +1,120 @@
+{
+    "method": "POST",
+    "url": "https://api.your-company-domain.com/v1/policies/ABC12345/transactions/full-surrender",
+    "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": "Bearer <token>",
+        "CorrelationId": "deadbeef-aaaa-bbbb-cccc-ddddeeeeffff"
+    },
+    "query": {
+        "cusip": "12345AB9"
+    },
+    "body": {
+        "effectiveDate": "2025-02-01",
+        "associatedFirmId": "FIRM999",
+        "nsccParticipantId": "NSCC999",
+        "producer": {
+            "producerNumber": "PROD999",
+            "npn": "9876543210",
+            "crdNumber": "1234567890"
+        },
+        "transactionAmounts": {
+            "requestedAmount": 0,
+            "requestedPercentage": 0,
+            "amountType": "MAX",
+            "disbursementType": "NET",
+            "disbursementPaymentForm": "EFT"
+        },
+        "payeeOrBeneficiary": [
+            {
+                "paymentForm": "EFT",
+                "allocationPercentage": 100,
+                "party": {
+                    "partyId": "Party_FS_1",
+                    "firstName": "Taylor",
+                    "lastName": "Johnson"
+                },
+                "bank": {
+                    "bankId": "Bank_FS",
+                    "nameOnAccount": "Taylor Johnson",
+                    "accountStatus": "ACTIVEBANKACCOUNT",
+                    "accountType": "CHECKING",
+                    "accountNumber": "9876543210",
+                    "routingNumber": "987654321",
+                    "branchName": "Central Branch"
+                },
+                "address": {
+                    "addressId": "Addr_FS",
+                    "addressType": "RESIDENCE",
+                    "addressLine1": "200 Main St",
+                    "addressLine2": "Suite 10",
+                    "addressLine3": "Floor 2",
+                    "city": "New York",
+                    "state": "NY",
+                    "zipCode": "10001",
+                    "zipCodeExtension": "0001",
+                    "country": "US"
+                }
+            }
+        ],
+        "parties": [
+            {
+                "partyId": "Party_FS_1",
+                "firstName": "Taylor",
+                "middleName": "A",
+                "lastName": "Johnson",
+                "organizationName": "Org FS",
+                "partyRole": "OWNER",
+                "paymentForm": "EFT",
+                "allocationPercentage": 100,
+                "bank": {
+                    "bankId": "Bank_FS",
+                    "nameOnAccount": "Taylor Johnson",
+                    "accountStatus": "ACTIVEBANKACCOUNT",
+                    "accountType": "CHECKING",
+                    "accountNumber": "9876543210",
+                    "routingNumber": "987654321",
+                    "branchName": "Central Branch"
+                },
+                "address": {
+                    "addressId": "Addr_FS",
+                    "addressType": "RESIDENCE",
+                    "addressLine1": "200 Main St",
+                    "addressLine2": "Suite 10",
+                    "addressLine3": "Floor 2",
+                    "city": "New York",
+                    "state": "NY",
+                    "zipCode": "10001",
+                    "zipCodeExtension": "0001",
+                    "country": "US"
+                }
+            }
+        ],
+        "taxWithholdingInstructions": [
+            {
+                "party": {
+                    "partyId": "Party_FS_1",
+                    "firstName": "Taylor",
+                    "lastName": "Johnson"
+                },
+                "taxWithholdingType": "FEDERAL",
+                "taxRateToUse": "USEDEFAULTTABLE",
+                "filingStatus": "DEFAULT",
+                "dollar": 0,
+                "percentage": 0,
+                "exemptions": 0,
+                "taxJurisdiction": "USA"
+            }
+        ],
+        "charges": [
+            {
+                "chargeType": "SURRENDERCHARGE",
+                "chargeWaiverIndicator": "YES",
+                "chargeWaiverReason": "AGE_59_5"
+            }
+        ],
+        "isOverride": true,
+        "cusip": "12345A"
+    }
+}

@@ -1,0 +1,141 @@
+{
+    "method": "POST",
+    "url": "https://api.your-company-domain.com/v1/policies/ABC12345/transactions/partial-withdrawal-one-time",
+    "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": "Bearer <token>",
+        "CorrelationId": "c0ffee00-1111-2222-3333-444455556666"
+    },
+    "query": {
+        "cusip": "12345AB9"
+    },
+    "body": {
+        "transactionSubType": "specified-withdrawal",
+        "effectiveDate": "2025-04-01",
+        "associatedFirmId": "FIRM777",
+        "nsccParticipantId": "NSCC777",
+        "producer": {
+            "producerNumber": "PROD777",
+            "npn": "3333333333",
+            "crdNumber": "4444444444"
+        },
+        "transactionAmounts": {
+            "requestedAmount": 0,
+            "requestedPercentage": 25,
+            "amountType": "PERCENTAGE",
+            "disbursementType": "GROSS",
+            "disbursementPaymentForm": "CHECK"
+        },
+        "fundAllocation": {
+            "allocationOption": "SPECIFIEDFUNDS"
+        },
+        "fundDistributions": [
+            {
+                "fundId": "FUND-NRMD1",
+                "fundName": "Income Fund",
+                "totalFundValue": 40000,
+                "requestedAmount": 220,
+                "requestedPercentage": 60,
+                "fundDistributionSegment": {
+                    "segmentId": "SEG-NRMD-1",
+                    "currentAmount": null,
+                    "requestedAmount": null
+                }
+            },
+            {
+                "fundId": "FUND-NRMD2",
+                "fundName": "Bond Fund",
+                "totalFundValue": 20000,
+                "requestedAmount": 440,
+                "requestedPercentage": 40,
+                "fundDistributionSegment": {
+                    "segmentId": "SEG-NRMD-2",
+                    "currentAmount": null,
+                    "requestedAmount": null
+                }
+            }
+        ],
+        "payeeOrBeneficiary": [
+            {
+                "paymentForm": "CHECK",
+                "allocationPercentage": 100,
+                "party": {
+                    "partyId": "Party_NRMD_1",
+                    "firstName": "Jordan",
+                    "lastName": "Kim"
+                },
+                "address": {
+                    "addressId": "Addr_NRMD",
+                    "addressType": "RESIDENCE",
+                    "addressLine1": "400 Oak St",
+                    "addressLine2": "Apt 2",
+                    "addressLine3": "Bldg B",
+                    "city": "San Francisco",
+                    "state": "CA",
+                    "zipCode": "94102",
+                    "zipCodeExtension": "5555",
+                    "country": "US"
+                }
+            }
+        ],
+        "parties": [
+            {
+                "partyId": "Party_NRMD_1",
+                "firstName": "Jordan",
+                "middleName": "C",
+                "lastName": "Kim",
+                "organizationName": "Org NRMD",
+                "partyRole": "OWNER",
+                "paymentForm": "CHECK",
+                "allocationPercentage": 100,
+                "bank": {
+                    "bankId": "Bank_NRMD",
+                    "nameOnAccount": "Jordan Kim",
+                    "accountStatus": "ACTIVEBANKACCOUNT",
+                    "accountType": "CHECKING",
+                    "accountNumber": "555666777",
+                    "routingNumber": "111222333",
+                    "branchName": "Uptown Branch"
+                },
+                "address": {
+                    "addressId": "Addr_NRMD",
+                    "addressType": "RESIDENCE",
+                    "addressLine1": "400 Oak St",
+                    "addressLine2": "Apt 2",
+                    "addressLine3": "Bldg B",
+                    "city": "San Francisco",
+                    "state": "CA",
+                    "zipCode": "94102",
+                    "zipCodeExtension": "5555",
+                    "country": "US"
+                }
+            }
+        ],
+        "taxWithholdingInstructions": [
+            {
+                "party": {
+                    "partyId": "Party_NRMD_1",
+                    "firstName": "Jordan",
+                    "lastName": "Kim"
+                },
+                "taxWithholdingType": "STATE",
+                "taxRateToUse": "USEDEFAULTTABLE",
+                "filingStatus": "DEFAULT",
+                "dollar": 0,
+                "percentage": 0,
+                "exemptions": 0,
+                "taxJurisdiction": "USA"
+            }
+        ],
+        "charges": [
+            {
+                "chargeType": "WITHDRAWALCHARGE",
+                "chargeWaiverIndicator": "YES",
+                "chargeWaiverReason": "PROMO"
+            }
+        ],
+        "isOverride": true,
+        "cusip": "12345A"
+    }
+}
