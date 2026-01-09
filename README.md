@@ -36,7 +36,7 @@ The initiative modernizes legacy XML/SOAP-based In-Force Transactions (IFT) into
 
 ### 1. Partial Withdrawals
 Handles scenarios where a policyholder withdraws a portion of their funds while keeping the policy active.  
-**Folder:** `./partial-withdrawal/`
+**Folder:** `./partialwithdrawal/`
 
 #### User Stories
 - As a Policy Administrator, I want to validate all required fields before submitting a transaction so that I can avoid processing delays.  
@@ -63,7 +63,7 @@ Pain Points: Confusing terminology, paper process.
 
 ### 2. Full Withdrawals
 Handles scenarios where a policyholder withdraws the entire balance, effectively terminating the policy.  
-**Folder:** `./full-withdrawal/`
+**Folder:** `./fullsurrender/`
 
 #### User Stories
 - As a Policy Administrator, I want to validate all required fields before submitting a transaction so that I can avoid processing delays.  
@@ -90,7 +90,7 @@ Pain Points: Confusing terminology, paper process.
 
 ### 3. One-Time RMD
 Handles scenarios where a policyholder takes a one-time RMD as per regulatory requirements.  
-**Folder:** `./one-time-rmd/`
+**Folder:** `./onetimermd/`
 
 #### User Stories
 - As a Policy Administrator, I want to validate all required fields before submitting a transaction so that I can avoid processing delays.  
