@@ -1,5 +1,5 @@
 
-# IRI Withdrawals API
+# IRI One-Time-Withdrawals API
 
 ## Overview
 This repository consolidates three key withdrawal transactions for annuity and retirement products under the **IRI Digital First vision**:
@@ -29,6 +29,9 @@ The initiative modernizes legacy XML/SOAP-based In-Force Transactions (IFT) into
 - Accelerated development using validated payload structures.
 - Standardized testing framework for early and consistent validation.
 - Open contribution to IRI standards for industry-wide adoption.
+- OpenAPI 3.x specifications with example payloads and conditional validation.
+- Data Dictionary for field-level definitions and code lists.
+- Unified endpoint with transactionType routing.
 
 ---
 
@@ -116,13 +119,16 @@ Pain Points: Confusing terminology, paper process.
 ---
 
 ## Schema Overview
-Each transaction includes:
-- **Root Attributes:** `correlationId`, `effectiveDate`, `override`
-- **Tax Withholding Instructions:** `taxWithholdingType`, `taxRateToUse`, `taxJurisdiction`
-- **Payee Details:** `partyId`, `paymentForm`, `bank`, `address`
-- **Charges:** `chargeType`, `chargeWaiverIndicator`
-- **Producer Info:** `producerNumber`, `npn`
-- **Transaction Amounts:** `amountType`, `disbursementType`
+Sample of what most schemas includes (one-time-rmd would differ from partial-withdrawal and full-withdrawals:
+- **Root Attributes:** correlationId , effectiveDate, isOverride, associatedFirmId, nsccParticipantId, allocationOption (for partial withdrawals)
+- **Producer Info:** producerNumber, npn, crdNumber.
+- **Transaction Amounts:** amountType (AMOUNT/PERCENTAGE), disbursementType (GROSS/NET), disbursementPaymentForm.
+- **Payee Details:** partyId, paymentForm, bank, address (modeled via payeeOrBeneficiary[]).
+- **Parties:** parties[] as a direct array of party objects.
+- **Fund Distributions:** fundDistributions[] with fundId, fundName, amounts/percentages, optional fundDistributionSegment.
+- **Tax Withholding Instructions:** taxWithholdingType, taxRateToUse, taxJurisdiction, filingStatus, percentage/dollar, associated party.
+- **Charges:** chargeType, chargeWaiverIndicator, chargeWaiverReason.
+- **RMD Info:** rmdTaxYear, rmdRequestedAmount, rmdCalculationMethod, rmdPriorYearEndValue, optional rmdSpouseDoB.
 
 Detailed schemas for each transaction are available in their respective folders.
 
@@ -139,6 +145,10 @@ Unified Swagger documentation for all endpoints is available in the `openapi-spe
 - **Security issues** should be reported directly to Katherine Dease at **kdease@irionline.org**.
 - Change requests should follow the **standards governance workflow** outlined on the main page.
 
+---
+## Versioning ##
+- Follow semantic versioning for spec updates.
+- Document changes in commit messages and changelogs to support integrator adoption.
 ---
 
 ## Code of Conduct
