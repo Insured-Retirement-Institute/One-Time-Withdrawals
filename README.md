@@ -5,7 +5,7 @@
 This repository consolidates three key withdrawal transactions for annuity and retirement products under the **IRI Digital First vision**:
 
 - **Partial Withdrawals**
-- **Full Withdrawals**
+- **Full Surrender**
 - **One-Time RMD (Required Minimum Distribution)**
 
 The initiative modernizes legacy XML/SOAP-based In-Force Transactions (IFT) into RESTful APIs for secure, scalable, and interoperable processing. It leverages industry standards and provides a unified approach for carriers, distributors, and solution providers.
@@ -64,7 +64,7 @@ Pain Points: Confusing terminology, paper process.
 
 ---
 
-### 2. Full Withdrawals
+### 2. Full Surrender
 Handles scenarios where a policyholder withdraws the entire balance, effectively terminating the policy.  
 **Folder:** `./fullsurrender/`
 
@@ -119,7 +119,7 @@ Pain Points: Confusing terminology, paper process.
 ---
 
 ## Schema Overview
-Sample of what most schemas includes (one-time-rmd would differ from partial-withdrawal and full-withdrawals:
+Sample of what most schemas includes (one-time-rmd would differ from partial-withdrawal and full-surrender:
 - **Root Attributes:** correlationId , effectiveDate, isOverride, associatedFirmId, nsccParticipantId, allocationOption (for partial withdrawals)
 - **Producer Info:** producerNumber, npn, crdNumber.
 - **Transaction Amounts:** amountType (AMOUNT/PERCENTAGE), disbursementType (GROSS/NET), disbursementPaymentForm.
