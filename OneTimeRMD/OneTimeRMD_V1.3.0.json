@@ -7,9 +7,11 @@
         "Authorization": "Bearer <token>",
         "correlationId": "c0ffee00-1111-2222-3333-444455556666"
     },
+    "query": {
+        "transactionSubType": "rmd"
+    },
    
-    "body": {
-        "transactionSubType": "rmd",
+    "body": {       
         "effectiveDate": "2025-01-15",
         "associatedFirmId": "DTCC",
         "nsccParticipantId": "NSCC001",
@@ -32,23 +34,13 @@
                 "fundId": "FUND-ABC",
                 "fundName": "Growth Fund",
                 "totalFundValue": null,
-                "requestedAmount": null,
-                "fundDistributionSegment": {
-                    "segmentId": "SEG-1",
-                    "currentAmount": null,
-                    "requestedAmount": null
-                }
+                "requestedAmount": null
             },
             {
                 "fundId": "FUND-XYZ",
                 "fundName": "Income Fund",
                 "totalFundValue": null,
-                "requestedAmount": null,
-                "fundDistributionSegment": {
-                    "segmentId": "SEG-2",
-                    "currentAmount": null,
-                    "requestedAmount": null
-                }
+                "requestedAmount": null
             }
         ],
         "rmdInfo": {
@@ -64,15 +56,15 @@
                 "paymentForm": "ACH",
                 "allocationPercentage": 100,
                 "party": {
-                    "partyId": "Party_PI_1",
-                    "firstName": "Alex",
-                    "middleName": "M",
-                    "lastName": "Smith",
-                    "organizationName": "OrgName"
+					"taxId": "123456789",
+					"firstName": "Morgan",
+					"middleName": "B",
+					"lastName": "Lee",
+					"type": "individual"
                 },
                 "bank": {
                     "bankId": "Bank_1",
-                    "nameOnAccount": "Alex Smith",
+                    "nameOnAccount": "Morgan Lee",
                     "accountStatus": "ACTIVEBANKACCOUNT",
                     "accountType": "CHECKING",
                     "accountNumber": "12345678",
@@ -95,17 +87,19 @@
         ],
         "parties": [
             {
-                "partyId": "Party_PI_1",
-                "firstName": "Alex",
-                "middleName": "M",
-                "lastName": "Smith",
-                "organizationName": "OrgName",
-                "partyRole": "OWNER",
-                "paymentForm": "ACH",
-                "allocationPercentage": 100,
+			  "taxId": "123456789",
+			  "firstName": "Morgan",
+			  "middleName": "B",
+			  "lastName": "Lee",
+			  "type": "individual",
+			  "relationships": [
+				"owner"
+			  ],
+			  "paymentForm": "ACH",
+			  "allocationPercentage": 100,
                 "bank": {
                     "bankId": "Bank_1",
-                    "nameOnAccount": "Alex Smith",
+                    "nameOnAccount": "Morgan Lee",
                     "accountStatus": "ACTIVEBANKACCOUNT",
                     "accountType": "CHECKING",
                     "accountNumber": "12345678",
@@ -129,19 +123,17 @@
         "taxWithholdingInstructions": [
             {
                 "party": {
-                    "partyId": "Party_PI_1",
-                    "firstName": "Alex",
-                    "middleName": "M",
-                    "lastName": "Smith",
-                    "organizationName": "OrgName"
+					"taxId": "123456789",
+					"firstName": "Morgan",
+					"middleName": "B",
+					"lastName": "Lee",
+					"type": "individual"
                 },
                 "taxWithholdingType": "FEDERAL",
                 "taxRateToUse": "USEVALUESENTERED",
                 "filingStatus": "SINGLE",
                 "dollar": 10,
-                "percentage": 20,
-                "exemptions": 0,
-                "taxJurisdiction": "USA"
+                "exemptions": 0
             }
         ],
         "charges": [

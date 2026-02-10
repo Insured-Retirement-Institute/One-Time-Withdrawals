@@ -27,9 +27,11 @@
                 "paymentForm": "EFT",
                 "allocationPercentage": 100,
                 "party": {
-                    "partyId": "Party_FS_1",
-                    "firstName": "Taylor",
-                    "lastName": "Johnson"
+					"firstName": "Taylor",
+					"middleName": "A",
+					"lastName": "Johnson",
+					"type": "individual",
+					"taxId": "123456789"
                 },
                 "bank": {
                     "bankId": "Bank_FS",
@@ -56,14 +58,16 @@
         ],
         "parties": [
             {
-                "partyId": "Party_FS_1",
-                "firstName": "Taylor",
-                "middleName": "A",
-                "lastName": "Johnson",
-                "organizationName": "Org FS",
-                "partyRole": "OWNER",
-                "paymentForm": "EFT",
-                "allocationPercentage": 100,
+			  "taxId": "123456789",
+			  "firstName": "Taylor",
+			  "middleName": "A",
+			  "lastName": "Johnson",
+			  "type": "individual",
+			  "relationships": [
+				"owner"
+			  ],
+			  "paymentForm": "EFT",
+			  "allocationPercentage": 100,
                 "bank": {
                     "bankId": "Bank_FS",
                     "nameOnAccount": "Taylor Johnson",
@@ -90,17 +94,17 @@
         "taxWithholdingInstructions": [
             {
                 "party": {
-                    "partyId": "Party_FS_1",
-                    "firstName": "Taylor",
-                    "lastName": "Johnson"
+					"firstName": "Taylor",
+					"middleName": "A",
+					"lastName": "Johnson",
+					"type": "individual",
+					"taxId": "123456789"
                 },
                 "taxWithholdingType": "FEDERAL",
                 "taxRateToUse": "USEDEFAULTTABLE",
                 "filingStatus": "DEFAULT",
                 "dollar": 5,
-                "percentage": 5,
-                "exemptions": 0,
-                "taxJurisdiction": "USA"
+                "exemptions": 0
             }
         ],
         "charges": [
