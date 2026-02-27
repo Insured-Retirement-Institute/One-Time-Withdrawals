@@ -24,12 +24,11 @@ The initiative modernizes legacy XML/SOAP-based In-Force Transactions (IFT) into
 - Ensure long-term support and interoperability.
 
 ### Key Features
-- Modular RESTful APIs with JSON payloads and OAuth 2.0 authentication.
 - OpenAPI/Swagger documentation for easy onboarding.
 - Accelerated development using validated payload structures.
 - Standardized testing framework for early and consistent validation.
 - Open contribution to IRI standards for industry-wide adoption.
-- OpenAPI 3.x specifications with example payloads and conditional validation.
+- OpenAPI 3.1.x specifications with example payloads and conditional validation.
 - Data Dictionary for field-level definitions and code lists.
 - Unified endpoint with transactionType routing.
 
@@ -120,31 +119,30 @@ Pain Points: Confusing terminology, paper process.
 
 ## Schema Overview
 Sample of what most schemas includes (one-time-rmd would differ from partial-withdrawal and full-surrender:
-- **Root Attributes:** correlationId , effectiveDate, isOverride, associatedFirmId, nsccParticipantId, allocationOption (for partial withdrawals)
+- **Root Attributes:**  effectiveDate, isOverride,  nsccParticipantId, allocationOption (for partial withdrawals)
 - **Producer Info:** producerNumber, npn, crdNumber.
 - **Transaction Amounts:** amountType (AMOUNT/PERCENTAGE), disbursementType (GROSS/NET), disbursementPaymentForm.
 - **Payee Details:** partyId, paymentForm, bank, address (modeled via payeeOrBeneficiary[]).
 - **Parties:** parties[] as a direct array of party objects.
 - **Fund Distributions:** fundDistributions[] with fundId, fundName, amounts/percentages, optional fundDistributionSegment.
 - **Tax Withholding Instructions:** taxWithholdingType, taxRateToUse, taxJurisdiction, filingStatus, percentage/dollar, associated party.
-- **Charges:** chargeType, chargeWaiverIndicator, chargeWaiverReason.
+- **Charges:** chargeType, isChargeWaived, chargeWaiverReason.
 - **RMD Info:** rmdTaxYear, rmdRequestedAmount, rmdCalculationMethod, rmdPriorYearEndValue, optional rmdSpouseDoB.
 
 Detailed schemas for each transaction are available in their respective folders.
 
 ---
 
-# Error Schema Overview
+# Response Schema Overview
 
 All API operations—across synchronous and asynchronous processing models—adhere to a unified **Error schema**. This ensures consistent error handling, predictable integration behavior, and standardized troubleshooting across all transaction types.
 
 ## Success Response Expectations
 
-### Synchronous APIs
-- Return **HTTP 200** for successful, completed processing.
-
-### Asynchronous APIs
-- Return **HTTP 202** to acknowledge the request has been accepted for processing but not yet completed.
+- Return **HTTP 201** created.
+- Include a Location header pointing to /v1/policies/{policyNumber}/withdrawal-requests/{requestId}
+- Return a 'WithdrawalRequestStatus' object in the response body, including 'requestId', 'status', 'effectiveDate', and 'transactionSubType'
+- A GET endpoint is available to retrieve the lifecycle status with **HTTP 200 — SUCCESS**.
 
 ---
 
