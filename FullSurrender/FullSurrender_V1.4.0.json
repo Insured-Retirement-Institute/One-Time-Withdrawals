@@ -1,16 +1,17 @@
 {
     "method": "POST",
-    "url": "https://api.your-company-domain.com/v1/policies/ABC12345/transactions/fullSurrender",
+    "url": "https://api.your-company-domain.com/v1/policies/ABC12345/withdrawal-requests/full-surrenders",
     "headers": {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "Authorization": "Bearer <token>",
         "correlationId": "deadbeef-aaaa-bbbb-cccc-ddddeeeeffff"
     },
-    
+        "query": {
+        "associatedFirmId": "DTCC"
+    },
     "body": {
         "effectiveDate": "2025-02-01",
-        "associatedFirmId": "DTCC",
         "nsccParticipantId": "NSCC999",
         "cusip": "0275IFOW4",
         "producer": {
@@ -110,7 +111,7 @@
         "charges": [
             {
                 "chargeType": "SURRENDERCHARGE",
-                "chargeWaiverIndicator": "YES",
+                "isChargeWaived": true,
                 "chargeWaiverReason": "AGE_59_5"
             }
         ],

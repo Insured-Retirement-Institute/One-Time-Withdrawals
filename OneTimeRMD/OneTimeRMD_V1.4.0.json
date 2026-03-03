@@ -1,6 +1,6 @@
 {
     "method": "POST",
-    "url": "https://api.your-company-domain.com/v1/policies/ABC12345/transactions/oneTimePartialWithdrawal",
+    "url": "https://api.your-company-domain.com/v1/policies/ABC12345/withdrawal-requests/one-time-partials",
     "headers": {
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -8,12 +8,13 @@
         "correlationId": "c0ffee00-1111-2222-3333-444455556666"
     },
     "query": {
+
+        "associatedFirmId": "DTCC",
         "transactionSubType": "rmd"
     },
    
     "body": {       
         "effectiveDate": "2025-01-15",
-        "associatedFirmId": "DTCC",
         "nsccParticipantId": "NSCC001",
         "cusip": "0275IFOW4",
         "allocationOption": "PRORATA",
@@ -139,7 +140,7 @@
         "charges": [
             {
                 "chargeType": "WITHDRAWALCHARGE",
-                "chargeWaiverIndicator": "NO",
+                "isChargeWaived": false,
                 "chargeWaiverReason": ""
             }
         ],
