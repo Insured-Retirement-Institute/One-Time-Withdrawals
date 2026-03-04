@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: One-Time Withdrawal API (Full Surrender and Partial Withdrawal(including RMD))
-  version: 1.4.0
+  version: 1.4.1
   description: >
     API to submit one-time withdrawals (Partial, Full, and RMD) on a policy.
     Supported transaction types: oneTimePartialWithdrawal, fullSurrender.
@@ -443,7 +443,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WithdrawalRequestStatus'
+                $ref: '#/components/schemas/GetWithdrawalRequestStatus'
         '400': { $ref: '#/components/responses/BadRequestError' }
         '401': { $ref: '#/components/responses/UnauthorizedError' }
         '403': { $ref: '#/components/responses/ForbiddenError' }
@@ -1209,13 +1209,35 @@ components:
         status:
           type: string
           description: Current status of the withdrawal request.
-          enum: [CREATED, SUCCESS]
+          enum: [CREATED, REJECTED]
         effectiveDate:
           type: string
           format: date
         transactionSubType:
           type: string
           enum: [specified-withdrawal, surrender-free, rider-free, interest-only, rmd]
+      required: [requestId, status]
+
+    GetWithdrawalRequestStatus:
+      type: object
+      description: Withdrawal request status resource created by the GET.
+      properties:
+        requestId:
+          type: string
+          description: Server-assigned identifier for the withdrawal request.
+        status:
+          type: string
+          description: Current status of the withdrawal request.
+          enum: [IN_PROGRESS, SUCCESS, REJECTED]
+        effectiveDate:
+          type: string
+          format: date
+        transactionSubType:
+          type: string
+          enum: [specified-withdrawal, surrender-free, rider-free, interest-only, rmd]
+        message:
+          type: string
+          description: Technical message with specific error details for developers identify the type of error quickly.
       required: [requestId, status]
 
     Error:
@@ -1243,13 +1265,6 @@ components:
         userMessage:
           type: string
           description: End-user readable message to describe the error in simple terms.
-        documentationUrl:
-          type: string
-          description: Link to documentation about the error - linking to error-specific documentation.
-          format: uri
-        transient:
-          type: boolean
-          description: Indicates if the error is temporary
         validationErrors:
           type: array
           items:
