@@ -1,0 +1,18 @@
+{
+  "eventType": "day2confirm",
+  "eventId": "8c2f1c9e-4cbb-4b6f-bd5a-63f4d2b9a101",
+  "eventTimestamp": "2026-08-21T14:45:30Z",
+  "associatedFirmId": "0432",
+  "requestId": "REQ-OTW-00012345",
+  "correlationId": "CORR-20260821-0001",
+  "policyNumber": "POL123456789",
+  "transactionType": "one-time-partials",
+  "transactionSubType": "rmd",
+  "status": "SUCCESS",
+  "message": "One-time RMD withdrawal completed successfully.",
+  "effectiveDate": "2026-08-20",
+  "npn": "1111111111",
+  "nsccParticipantId": "0432",
+  "transExeDate": "2026-08-21",
+  "transExeTime": "14:43:12"
+}

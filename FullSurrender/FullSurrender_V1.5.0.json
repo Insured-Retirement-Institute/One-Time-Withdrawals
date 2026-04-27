@@ -102,10 +102,9 @@
 					"taxId": "123456789"
                 },
                 "taxWithholdingType": "FEDERAL",
-                "taxRateToUse": "USEDEFAULTTABLE",
-                "filingStatus": "DEFAULT",
-                "dollar": 5,
-                "exemptions": 0
+                "taxRateToUse": "USEVALUESENTERED",
+                "filingStatus": "SINGLE",
+                "dollar": 15
             }
         ],
         "charges": [

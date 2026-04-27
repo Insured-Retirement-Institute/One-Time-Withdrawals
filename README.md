@@ -180,6 +180,38 @@ This standardized error structure ensures:
 
 ---
 
+# Day‑2 Asynchronous Processing
+One‑Time Withdrawal transactions use an asynchronous processing model after initial request submission.
+Upon successful validation, the API returns HTTP 201 (Created) and assigns a unique requestId. This response confirms acceptance of the request but does not indicate final transaction completion.
+Final processing occurs asynchronously in downstream systems.
+
+## Delivery Model
+Day‑2 confirmation events are published to the enterprise event mesh (SAP Advanced Event Mesh / Solace).
+Consumers receive confirmations through topic‑based subscriptions.
+Day‑2 confirmations are event‑driven only.
+
+## Day‑2 Confirmation
+Final transaction outcomes are communicated via a Day‑2 withdrawal confirmation event.
+The event represents a terminal state of the transaction. Each event includes the original requestId for correlation and traceability. Supported outcomes include:
+- SUCCESS
+- SUCCESS_WITH_INFO
+- FAILURE
+
+## Day‑2 Schema
+Day‑2 confirmation events conform to a canonical Day‑2 Withdrawal Confirmation schema.
+The schema defines the standardized event structure, including:
+- Event metadata (eventId, eventTimestamp, eventType)
+- Transaction identifiers (requestId, policyNumber)
+- Processing outcome (status, message)
+- Execution details (transactionType, transactionSubType, execution date and time)
+
+## Status Visibility
+A GET lifecycle endpoint is available to retrieve the current processing status using the requestId.
+The GET endpoint provides operational visibility and audit support.
+The GET endpoint does not replace Day‑2 event delivery as the source of final confirmation.
+
+---
+
 ## OpenAPI Specs
 Unified Swagger documentation for all endpoints is available in the `openapi-specs/` folder.
 

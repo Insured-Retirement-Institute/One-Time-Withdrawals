@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: One-Time Withdrawal API (Full Surrender and Partial Withdrawal(including RMD))
-  version: 1.4.2
+  version: 1.5.0
   description: >
     API to submit one-time withdrawals (Partial, Full, and RMD) on a policy.
     Supported transaction types: oneTimePartialWithdrawal, fullSurrender.
@@ -146,7 +146,6 @@ paths:
                       taxRateToUse: 'USEVALUESENTERED'
                       filingStatus: 'SINGLE'
                       dollar: 15.00
-                      exemptions: 0
                   charges:
                     - chargeType: 'WITHDRAWALCHARGE'
                       isChargeWaived: false
@@ -234,10 +233,9 @@ paths:
                         lastName: 'Kim'
                         type: individual
                       taxWithholdingType: 'STATE'
-                      taxRateToUse: 'USEDEFAULTTABLE'
-                      filingStatus: 'DEFAULT'
-                      dollar: 5
-                      exemptions: 0
+                      taxRateToUse: 'USEVALUESENTERED'
+                      filingStatus: 'SINGLE'
+                      dollar: 15.00
                       taxJurisdiction: 'USA'
                   charges:
                     - chargeType: 'WITHDRAWALCHARGE'
@@ -377,10 +375,9 @@ paths:
                         lastName: 'Johnson'
                         type: 'individual'
                       taxWithholdingType: 'FEDERAL'
-                      taxRateToUse: 'USEDEFAULTTABLE'
-                      filingStatus: 'DEFAULT'
-                      dollar: 5
-                      exemptions: 0
+                      taxRateToUse: 'USEVALUESENTERED'
+                      filingStatus: 'SINGLE'
+                      dollar: 15.00
                   charges:
                     - chargeType: 'SURRENDERCHARGE'
                       isChargeWaived: true
@@ -424,7 +421,10 @@ paths:
       operationId: getWithdrawalRequest
       tags:
         - Withdrawal Request Lifecycle
-      description: Retrieve the withdrawal request resource created by POST.
+      description: >
+        Retrieve the current processing status of a previously submitted
+        withdrawal request. This endpoint allows clients to poll for
+        status updates until the transaction reaches a final outcome.
       parameters:
         - $ref: '#/components/parameters/PolicyNumber'
         - name: requestId
@@ -649,7 +649,7 @@ components:
           maximum: 100
         amountType:
           type: string
-          enum: [AMOUNT, PERCENTAGE, MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY]
+          enum: [AMOUNT, PERCENTAGE, MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY, PENALTYFREE, RIDERFREE]
         disbursementType:
           type: string
           enum: [GROSS, NET]
@@ -687,7 +687,7 @@ components:
           - if:
             properties:
               amountType:
-                enum: [MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY]
+                enum: [MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY, PENALTYFREE, RIDERFREE]
             then:
               required: [amountType]
               not:
@@ -756,10 +756,6 @@ components:
           description: Computed tax percentage
           minimum: 0
           maximum: 100
-        exemptions:
-          type: integer
-          minimum: 0
-          maximum: 99
         taxJurisdiction:
           type: string
           maxLength: 50
@@ -1216,8 +1212,13 @@ components:
         transactionSubType:
           type: string
           enum: [specified-withdrawal, surrender-free, rider-free, interest-only, rmd]
+        message:
+          type: string
+          description: >
+            Optional informational or error message explaining the
+            processing result.
       required: [requestId, status]
-
+        
     GetWithdrawalRequestStatus:
       type: object
       description: Withdrawal request status resource created by the GET.
@@ -1237,7 +1238,9 @@ components:
           enum: [specified-withdrawal, surrender-free, rider-free, interest-only, rmd]
         message:
           type: string
-          description: Technical message with specific error details for developers identify the type of error quickly.
+          description: >
+            Optional informational or error message explaining the
+            processing result.
       required: [requestId, status]
 
     Error:
@@ -1277,3 +1280,131 @@ components:
       required:
         - code
         - message
+
+    Day2WithdrawalConfirmationEvent:
+      type: object
+      description: >
+        Canonical Day-2 withdrawal confirmation event published to the
+        enterprise event mesh after a one-time withdrawal request
+        completes processing.
+
+      required:
+        - eventType
+        - eventId
+        - eventTimestamp
+        - associatedFirmId
+        - requestId
+        - policyNumber
+        - transactionType
+        - status
+        - transExeDate
+        - transExeTime
+        - nsccParticipantId
+      properties:
+        # Event-level metadata
+        eventType:
+          type: string
+          description: >
+            Identifies the type of Day-2 confirmation event published to
+            the event mesh. 
+          enum:
+            - day2confirm
+        eventId:
+          type: string
+          maxLength: 36
+          description: >
+            Globally unique identifier for this event. Used by consuming
+            systems for idempotent processing and duplicate detection.
+        eventTimestamp:
+          type: string
+          format: date-time
+          description: >
+            Date and time when the event was published to the event mesh.
+        associatedFirmId:
+          type: string
+          maxLength: 65
+          description: >
+            Firm identifier associated with the transaction. Populated by
+            the integration platform as part of event enrichment.
+
+        # Day-2 business outcome data
+
+        requestId:
+          type: string
+          description: >
+            Identifier assigned when the withdrawal request was submitted.
+            Used to correlate the Day-2 confirmation with the original
+            Day-1 request.
+        correlationId:
+          type: string
+          maxLength: 100
+          description: >
+            Optional correlation identifier supplied with the original
+            request and propagated to the Day-2 confirmation for
+            end-to-end traceability.
+        policyNumber:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: >
+            Policy number associated with the withdrawal request.
+        transactionType:
+          type: string
+          enum:
+            - one-time-partials
+            - full-surrenders
+          description: >
+            High-level classification of the transaction that completed
+            processing.
+        transactionSubType:
+          type: string
+          description: >
+            Optional subtype of the transaction, when applicable
+            (for example, RMD or interest-only).
+          enum:
+            - specified-withdrawal
+            - surrender-free
+            - rider-free
+            - interest-only
+            - rmd
+        status:
+          type: string
+          description: >
+            Final processing outcome of the withdrawal request.
+          enum:
+            - SUCCESS
+            - SUCCESS_WITH_INFO
+            - FAILURE
+        message:
+          type: string
+          description: >
+            Human-readable explanation of the outcome. Populated when the transaction fails or additional explanation is required.
+        effectiveDate:
+          type: string
+          format: date
+          description: >
+            Effective date of the withdrawal on the policy, when applicable.
+        npn:
+          type: string
+          maxLength: 100
+          description: >
+            National Producer Number associated with the transaction,
+            when available.
+        nsccParticipantId:
+          type: string
+          maxLength: 100
+          description: >
+            NSCC participant identifier associated with the submitting firm, when available.
+        transExeDate:
+          type: string
+          format: date
+          description: >
+            Date on which the Day‑2 confirmation was produced by the
+            transaction processing system.
+        transExeTime:
+          type: string
+          pattern: '^([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$'
+          description: >
+            Time on which the Day-2 confirmation was produced by the
+            transaction processing system.
+    
