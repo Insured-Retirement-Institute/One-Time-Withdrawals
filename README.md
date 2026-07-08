@@ -128,6 +128,7 @@ Sample of what most schemas includes (one-time-rmd would differ from partial-wit
 - **Tax Withholding Instructions:** taxWithholdingType, taxRateToUse, taxJurisdiction, filingStatus, percentage/dollar, associated party.
 - **Charges:** chargeType, isChargeWaived, chargeWaiverReason.
 - **RMD Info:** rmdTaxYear, rmdRequestedAmount, rmdCalculationMethod, rmdPriorYearEndValue, optional rmdSpouseDoB.
+- **correlationid, associatedfirmId, cusip, npn, nsccParticipantId has marked as Mandatory fields.
 
 Detailed schemas for each transaction are available in their respective folders.
 
@@ -141,7 +142,7 @@ All API operations—across synchronous and asynchronous processing models—adh
 
 - Return **HTTP 201** created.
 - Include a Location header pointing to /v1/policies/{policyNumber}/withdrawal-requests/{requestId}
-- Return a 'WithdrawalRequestStatus' object in the response body, including 'requestId', 'status', 'effectiveDate', and 'transactionSubType'
+- Return a 'WithdrawalRequestStatus' object in the response body, including 'requestId', 'status'(ACCEPTED, REJECTED), 'effectiveDate', and 'transactionSubType'
 - A GET endpoint is available to retrieve the lifecycle status with **HTTP 200 — SUCCESS**.
 
 ---
@@ -152,7 +153,6 @@ Every error response—regardless of transaction type—includes:
 - A structured and validated **error code**
 - A **timestamp** of when the error was generated
 - A developer‑focused **technical message** (`message`)
-- A safe, user‑friendly **userMessage**
 - A **correlationId** for cross‑system tracing
 - A **field‑level** or **rule‑level** error collections
 
@@ -164,7 +164,7 @@ Every error response—regardless of transaction type—includes:
 |-------|-------------|
 | **httpStatus** | Numeric HTTP status code (400–599) representing the type and severity of the failure. |
 | **code** | Structured identifier in the enforced format: `domain.category.subcategory`. Enables machine‑readable error handling. |
-| **correlationId** | Carries forward the inbound request’s correlation ID header to enable end‑to‑end traceability. |
+| **correlationId** | correlationId is returned as a response header on all responses, including errors. It is not included in the response body. |
 | **message** | End‑user‑friendly explanation, safe to show in portals or consumer‑facing apps. |
 | **validationErrors** | Array describing domain/business rule violations; each entry requires its own code and message. |
 
@@ -224,10 +224,6 @@ Unified Swagger documentation for all endpoints is available in the `openapi-spe
 - Change requests should follow the **standards governance workflow** outlined on the main page.
 
 ---
-## Versioning ##
-- Follow semantic versioning for spec updates.
-- Document changes in commit messages and changelogs to support integrator adoption.
----
 
 ## Code of Conduct
 
@@ -247,4 +243,42 @@ Please review and adhere to the **Code of Conduct** and **Style Guide** provided
 
 - **Carrier Business Owner:** digitalfirst@brighthousefinancial.com  
 - **Distributor Business Owner:** [contact]  
-- **Solution Provider Business Owner:** [contact]  
+- **Solution Provider Business Owner:** [contact] 
+
+---
+
+## Versioning ##
+- Follow semantic versioning for spec updates.
+- Document changes in commit messages and changelogs to support integrator adoption.
+
+amountType enum extended:
+  v1.4.2 → [AMOUNT, PERCENTAGE, MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY]
+  v1.5.1 → [AMOUNT, PERCENTAGE, MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY, PENALTYFREE, RIDERFREE]
+
+correlationId, cusip, npn, nsccParticipantId requirement changed:
+  v1.4.2 → optional
+  v1.5.1 → required
+
+Removed: taxWithholdingInstructions.exemptions
+  v1.4.2 → exemptions present
+  v1.5.1 → exemptions removed
+
+EVENT MODEL added in v1.5.1: Day2WithdrawalConfirmationEvent
+  Includes:
+    - eventType
+    - eventId
+    - eventTimestamp
+    - associatedFirmId
+    - requestId
+    - correlationId
+    - policyNumber
+    - transactionType
+    - transactionSubType
+    - status
+    - message
+    - effectiveDate
+    - npn
+    - nsccParticipantId
+    - transExeDate
+    - transExeTime
+

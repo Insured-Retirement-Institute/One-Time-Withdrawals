@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: One-Time Withdrawal API (Full Surrender and Partial Withdrawal(including RMD))
-  version: 1.5.0
+  version: 1.5.1
   description: >
     API to submit one-time withdrawals (Partial, Full, and RMD) on a policy.
     Supported transaction types: oneTimePartialWithdrawal, fullSurrender.
@@ -465,7 +465,7 @@ components:
     CorrelationIdHeader:
       name: correlationId
       in: header
-      required: false
+      required: true
       description: Optional client-supplied identifier to trace the request.
       schema:
         type: string
@@ -475,15 +475,32 @@ components:
       in: query
       required: true
       description: >
-            Indicates the business rules that apply to the partial one-time withdrawal, such as regular amount,
-            free withdrawal, interest-only, or RMD. For one-time RMD transactions, select transactionSubType as RMD.
+            Indicates the business context and validation rules for the withdrawal request.
+            This field drives conditional payload requirements and processing logic.
+
+            Special Behavior:
+            - The value of `transactionSubType` determines whether additional fields
+              (such as `rmdInfo`) are required or must be omitted.
+
+            Values:
+            - specified-withdrawal: Standard partial withdrawal
+            - surrender-free: Withdrawal within free limits
+            - rider-free: Withdrawal covered under rider benefits
+            - interest-only: Withdrawal limited to earned interest
+            - rmd: Required Minimum Distribution (RMD)
+
+            Rules:
+            - When transactionSubType = rmd:
+              - `rmdInfo` MUST be provided in the request body
+            - When transactionSubType ≠ rmd:
+              - `rmdInfo` MUST NOT be present
       schema:
         type: string
         enum: [specified-withdrawal, surrender-free, rider-free, interest-only, rmd]
     AssociatedFirmId:
       name: associatedFirmId
       in: query
-      required: false
+      required: true
       description: Optional firm/linkage identifier (preferred location per IRI).
       schema:
         type: string
@@ -493,6 +510,7 @@ components:
   headers:
     correlationId:
       description: Correlates this response to requests and downstream logs.
+      required: true
       schema:
         type: string
         maxLength: 100
@@ -637,7 +655,26 @@ components:
   schemas:
     TransactionAmounts:
       type: object
-      description: Details of financial amounts associated with the transaction
+      description: >
+        Defines the withdrawal amount details using either a fixed amount,
+        percentage, or system-determined calculation based on `amountType`.
+
+        Special Behavior (Conditional Validation):
+        - This schema uses JSON Schema conditional logic (`if/then/not`) to enforce
+          field requirements and mutual exclusivity based on `amountType`.
+        - Consumers MUST structure the payload according to the selected `amountType`.
+
+        Rules by amountType:
+        - AMOUNT:
+          - `requestedAmount` is REQUIRED
+          - `requestedPercentage` MUST NOT be provided
+        - PERCENTAGE:
+          - `requestedPercentage` is REQUIRED
+          - `requestedAmount` MUST NOT be provided
+        - MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS,
+          EARNINGSONLY, PENALTYFREE, RIDERFREE:
+          - Neither `requestedAmount` nor `requestedPercentage` should be provided
+          - Withdrawal amount will be calculated by the system per product rules
       properties:
         requestedAmount:
           type: number
@@ -685,9 +722,11 @@ components:
                 required:
                   - requestedAmount
           - if:
-            properties:
-              amountType:
-                enum: [MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY, PENALTYFREE, RIDERFREE]
+              properties:
+                amountType:
+                  enum: [MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY, PENALTYFREE, RIDERFREE]
+              required:
+                - amountType
             then:
               required: [amountType]
               not:
@@ -731,7 +770,30 @@ components:
 
     TaxWithholdingInstruction:
       type: object
-      description: List of tax withholding instruction entries
+      description: >
+        Defines tax withholding instructions for a party in the withdrawal request.
+        Valid Options:
+        - Provide `dollar`:
+          - Represents a fixed withholding amount
+          - `percentage` must not be provided
+
+        - Provide `percentage`:
+          - Represents withholding as a percentage
+          - `dollar` must not be provided
+
+        - Provide neither:
+          - Indicates no explicit withholding amount is supplied
+          - Typically aligns with taxRateToUse values such as
+            NOWITHHOLDINGELECTED, USEDEFAULTTABLE, NOWITHHOLDINGALLOWED
+
+        Invalid Scenarios:
+        - Providing both `dollar` and `percentage`
+        - Providing partial or conflicting withholding inputs
+
+        Notes:
+        - Exactly one of the above conditions must be satisfied
+        - Validation will fail if none or multiple conditions match
+
       properties:
         party:
           anyOf:
@@ -767,6 +829,14 @@ components:
           required: [dollar]
         - description: Use a percentage for withholding.
           required: [percentage]
+        - description: >
+            No withholding amount required (e.g. taxRateToUse of
+            NOWITHHOLDINGELECTED ,USEDEFAULTTABLE, NOWITHHOLDINGALLOWED). Neither dollar
+            nor percentage is supplied.
+          not:
+            anyOf:
+              - required: [dollar]
+              - required: [percentage]
       allOf:
         - if:
             properties:
@@ -775,33 +845,37 @@ components:
           then:
             required:
               - taxJurisdiction
-
+    
     Party:
+      type: object
       description: |
         The parties object represents the policy parties relevant to the withdrawal (owners, annuitants, beneficiaries, etc.), along with their identity, relationship, and payout instructions.
-      type: object
-      anyOf:
-        - $ref: '#/components/schemas/IndividualParty'
-        - $ref: '#/components/schemas/EntityParty'
-      properties:
-        paymentForm:
-          type: string
-          enum: [DTCC, ACH, CHECK, WIRE, EXCHANGE]
-        allocationPercentage:
-          type: number
-          minimum: 0
-          maximum: 100
-        bank:
-          $ref: '#/components/schemas/Bank'
-        address:
-          $ref: '#/components/schemas/Address'
-      required:
-        - paymentForm
-        - allocationPercentage
+      allOf:
+        - anyOf:
+            - $ref: '#/components/schemas/IndividualParty'
+            - $ref: '#/components/schemas/EntityParty'
+        - type: object
+          required:
+            - paymentForm
+            - allocationPercentage
+          properties:
+            paymentForm:
+              type: string
+              enum: [DTCC, ACH, CHECK, WIRE, EXCHANGE]
+            allocationPercentage:
+              type: number
+              minimum: 0
+              maximum: 100
+            bank:
+              $ref: '#/components/schemas/Bank'
+            address:
+              $ref: '#/components/schemas/Address'
 
     Producer:
       type: object
       description: Information about the producer submitting the request
+      required:
+        - npn
       properties:
         producerNumber:
           type: string
@@ -815,7 +889,12 @@ components:
 
     FundDistribution:
       type: object
-      description: Fund distribution details for the withdrawal
+      description: >
+        Represents fund-level details associated with the withdrawal request.
+        Conditional Rules:
+        - Either `requestedAmount` OR `requestedPercentage` must be provided.
+        - Both fields MUST NOT be provided together.
+        - At least one of the two fields is required
       properties:
         fundId:
           type: string
@@ -1020,7 +1099,19 @@ components:
 
     RmdInfo:
       type: object
-      description: RMD details specific to partial one-time withdrawals.
+      description: >
+        Provides Required Minimum Distribution (RMD) details for the withdrawal.
+
+        Special Behavior:
+        - This object is conditionally required based on `transactionSubType`.
+
+        Rules:
+        - MUST be provided when `transactionSubType = rmd`
+        - MUST NOT be provided for any non-RMD transaction
+
+        Notes:
+        - This object enables regulatory compliance for IRS RMD rules.
+        - Incorrect usage (missing or extraneous inclusion) will cause request validation failure.
       properties:
         rmdTaxYear:
           type: integer
@@ -1054,7 +1145,19 @@ components:
     OneTimePartialWithdrawalRequest:
       type: object
       description: >
-        Request to perform a one-time partial withdrawal.
+        Represents a one-time partial withdrawal request, including standard withdrawals
+          and Required Minimum Distributions (RMD).
+
+          Special Behavior:
+          - This schema is governed by external business rules defined via `transactionSubType`.
+          - Conditional validation is applied based on the subtype of the transaction.
+
+          Rules:
+          - When `transactionSubType = rmd`:
+            - `rmdInfo` is REQUIRED
+            - `transactionAmounts.requestedAmount` typically aligns with RMD calculation
+          - When `transactionSubType ≠ rmd`:
+            - `rmdInfo` MUST NOT be provided
       properties:
         effectiveDate:
           type: string
@@ -1102,7 +1205,10 @@ components:
           type: boolean
       required:
         - effectiveDate
+        - cusip
         - allocationOption
+        - nsccParticipantId
+        - producer
       allOf:
         - if:
             properties:
@@ -1194,6 +1300,9 @@ components:
           type: boolean
       required:
         - effectiveDate
+        - nsccParticipantId
+        - cusip
+        - producer
 
     WithdrawalRequestStatus:
       type: object
@@ -1282,6 +1391,15 @@ components:
         - message
 
     Day2WithdrawalConfirmationEvent:
+      x-event-mesh:
+        broker: SAP Advanced Event Mesh / Solace
+        topicPattern: "{root}/ift/v1/{eventType}/{status}/{transactionType}/{firm}"
+        deliveryModel: topic-subscription
+        asyncApiSpec: "./asyncapi/OneTimeWithdrawal_Day2_v1.5.yaml"
+        note: >
+          Delivered over a message broker via topic subscription, not an HTTP
+          callback. A companion AsyncAPI document is the machine-readable
+          contract; this extension exists for interim discoverability.
       type: object
       description: >
         Canonical Day-2 withdrawal confirmation event published to the
@@ -1300,6 +1418,8 @@ components:
         - transExeDate
         - transExeTime
         - nsccParticipantId
+        - npn
+        - correlationId
       properties:
         # Event-level metadata
         eventType:
@@ -1312,6 +1432,7 @@ components:
         eventId:
           type: string
           maxLength: 36
+          format: uuid
           description: >
             Globally unique identifier for this event. Used by consuming
             systems for idempotent processing and duplicate detection.
@@ -1403,7 +1524,7 @@ components:
             transaction processing system.
         transExeTime:
           type: string
-          pattern: '^([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$'
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$'
           description: >
             Time on which the Day-2 confirmation was produced by the
             transaction processing system.
