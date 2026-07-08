@@ -1,7 +1,8 @@
 
 # IRI One-Time-Withdrawals API
 
-## Overview
+> **NOTE:** This repository is for the working group to use while drafting documentation and specifications before they are formally ratified.  Users outside of the working group should not begin implementing solutions based on the content in this repository as it is likely to change without notice.
+
 This repository consolidates three key withdrawal transactions for annuity and retirement products under the **IRI Digital First vision**:
 
 - **Partial Withdrawals**
@@ -10,9 +11,14 @@ This repository consolidates three key withdrawal transactions for annuity and r
 
 The initiative modernizes legacy XML/SOAP-based In-Force Transactions (IFT) into RESTful APIs for secure, scalable, and interoperable processing. It leverages industry standards and provides a unified approach for carriers, distributors, and solution providers.
 
----
+## Draft API Specifications
+
+The working group's draft OpenAPI specification is in the [draft-api-specs](./draft-api-specs) directory.  See [README.md](draft-api-specs/README.md) for more details.
 
 ## Business Case
+
+The working group's draft business case documentation is available in this repository. Once the documentation is finalized, it will be formally published on the [IRI DFA Library of Standards](https://www.irionline.org/member-programs/operations-technology/digital-first-library-standards/).
+
 ### Problem Statement
 - Legacy XML/SOAP systems are inefficient, lack modern security, and are nearing end-of-life.
 - REST APIs provide real-time, lightweight, and secure data exchange.
@@ -38,7 +44,7 @@ The initiative modernizes legacy XML/SOAP-based In-Force Transactions (IFT) into
 
 ### 1. Partial Withdrawals
 Handles scenarios where a policyholder withdraws a portion of their funds while keeping the policy active.  
-**Folder:** `./partialwithdrawal/`
+**Folder:** [./draft-api-specs/PartialWithdrawal](./draft-api-specs/PartialWithdrawal/)
 
 #### User Stories
 - As a Policy Administrator, I want to validate all required fields before submitting a transaction so that I can avoid processing delays.  
@@ -65,7 +71,7 @@ Pain Points: Confusing terminology, paper process.
 
 ### 2. Full Surrender
 Handles scenarios where a policyholder withdraws the entire balance, effectively terminating the policy.  
-**Folder:** `./fullsurrender/`
+**Folder:** [./draft-api-specs/FullSurrender](./draft-api-specs/FullSurrender/)
 
 #### User Stories
 - As a Policy Administrator, I want to validate all required fields before submitting a transaction so that I can avoid processing delays.  
@@ -92,7 +98,7 @@ Pain Points: Confusing terminology, paper process.
 
 ### 3. One-Time RMD
 Handles scenarios where a policyholder takes a one-time RMD as per regulatory requirements.  
-**Folder:** `./onetimermd/`
+**Folder:** [./draft-api-specs/OneTimeRMD](./draft-api-specs/OneTimeRMD/)
 
 #### User Stories
 - As a Policy Administrator, I want to validate all required fields before submitting a transaction so that I can avoid processing delays.  
@@ -180,62 +186,14 @@ This standardized error structure ensures:
 
 ---
 
-# Day‑2 Asynchronous Processing
-One‑Time Withdrawal transactions use an asynchronous processing model after initial request submission.
-Upon successful validation, the API returns HTTP 201 (Created) and assigns a unique requestId. This response confirms acceptance of the request but does not indicate final transaction completion.
-Final processing occurs asynchronously in downstream systems.
+## Example Payloads
 
-## Delivery Model
-Day‑2 confirmation events are published to the enterprise event mesh (SAP Advanced Event Mesh / Solace).
-Consumers receive confirmations through topic‑based subscriptions.
-Day‑2 confirmations are event‑driven only.
+Sample request/response payloads for each transaction type, and the data dictionary, are in the [draft-api-specs](./draft-api-specs) directory:
 
-## Day‑2 Confirmation
-Final transaction outcomes are communicated via a Day‑2 withdrawal confirmation event.
-The event represents a terminal state of the transaction. Each event includes the original requestId for correlation and traceability. Supported outcomes include:
-- SUCCESS
-- SUCCESS_WITH_INFO
-- FAILURE
-
-## Day‑2 Schema
-Day‑2 confirmation events conform to a canonical Day‑2 Withdrawal Confirmation schema.
-The schema defines the standardized event structure, including:
-- Event metadata (eventId, eventTimestamp, eventType)
-- Transaction identifiers (requestId, policyNumber)
-- Processing outcome (status, message)
-- Execution details (transactionType, transactionSubType, execution date and time)
-
-## Status Visibility
-A GET lifecycle endpoint is available to retrieve the current processing status using the requestId.
-The GET endpoint provides operational visibility and audit support.
-The GET endpoint does not replace Day‑2 event delivery as the source of final confirmation.
-
----
-
-## OpenAPI Specs
-Unified Swagger documentation for all endpoints is available in the `openapi-specs/` folder.
-
----
-
-## Change Submissions and Reporting Issues
-
-- Issues and bugs can be reported directly within the **Issues** tab of this repository.
-- **Security issues** should be reported directly to Katherine Dease at **kdease@irionline.org**.
-- Change requests should follow the **standards governance workflow** outlined on the main page.
-
----
-
-## Code of Conduct
-
-Please review and adhere to the **Code of Conduct** and **Style Guide** provided in the repository to ensure consistency and professionalism.
-
----
-
-## How to Contribute
-
-- Fork the repo and submit pull requests.
-- Report issues via the **Issues** tab.
-- Join working groups: **hpikus@irionline.org**.
+- [PartialWithdrawal](./draft-api-specs/PartialWithdrawal/)
+- [FullSurrender](./draft-api-specs/FullSurrender/)
+- [OneTimeRMD](./draft-api-specs/OneTimeRMD/)
+- [DataDictionary_OneTimeWithdrawal_0.4.2.xlsx](./draft-api-specs/DataDictionary_OneTimeWithdrawal_0.4.2.xlsx)
 
 ---
 
@@ -243,42 +201,15 @@ Please review and adhere to the **Code of Conduct** and **Style Guide** provided
 
 - **Carrier Business Owner:** digitalfirst@brighthousefinancial.com  
 - **Distributor Business Owner:** [contact]  
-- **Solution Provider Business Owner:** [contact] 
+- **Solution Provider Business Owner:** [contact]  
 
----
+## How to engage, contribute, and give feedback
+- Please contact the business owners or IRI (hpikus@irionline.org) to get added to the working group discussions.
 
-## Versioning ##
-- Follow semantic versioning for spec updates.
-- Document changes in commit messages and changelogs to support integrator adoption.
+## Change submissions and reporting issues and bugs
 
-amountType enum extended:
-  v1.4.2 → [AMOUNT, PERCENTAGE, MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY]
-  v1.5.1 → [AMOUNT, PERCENTAGE, MAX, FREEWITHDRAWALAMOUNT, WITHDRAWALUNTILBASIS, EARNINGSONLY, PENALTYFREE, RIDERFREE]
+Security issues and bugs should be reported directly to Katherine Dease kdease@irionline.org. Issues and bugs can be reported directly within the issues tab of a repository. Change requests should follow the standards governance workflow outlined on the [main page](https://github.com/Insured-Retirement-Institute).
 
-correlationId, cusip, npn, nsccParticipantId requirement changed:
-  v1.4.2 → optional
-  v1.5.1 → required
+## Code of conduct
 
-Removed: taxWithholdingInstructions.exemptions
-  v1.4.2 → exemptions present
-  v1.5.1 → exemptions removed
-
-EVENT MODEL added in v1.5.1: Day2WithdrawalConfirmationEvent
-  Includes:
-    - eventType
-    - eventId
-    - eventTimestamp
-    - associatedFirmId
-    - requestId
-    - correlationId
-    - policyNumber
-    - transactionType
-    - transactionSubType
-    - status
-    - message
-    - effectiveDate
-    - npn
-    - nsccParticipantId
-    - transExeDate
-    - transExeTime
-
+See the [Digital-First-Specifications](https://github.com/Insured-Retirement-Institute/Digital-First-Specifications) repository
